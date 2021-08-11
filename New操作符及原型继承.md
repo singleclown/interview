@@ -298,3 +298,6 @@
         // 验证继承关系:
         xiaoming instanceof PrimaryStudent; // true
         xiaoming instanceof Student; // true
+
+#### 原型链关系图
+<img src="./imgs/原型链new.png" width="50%" height="50%">
