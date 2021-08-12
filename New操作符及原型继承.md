@@ -301,3 +301,32 @@
 
 #### 原型链关系图
 <img src="./imgs/原型链new.png" width="50%" height="50%">
+new 优先级new Foo 等同于 new Foo()，也就是没有指定参数列表，Foo 不带任何参数调用的情况。有参数列表的优先级更高，有参数列表的情况为括号为多个
+带参数列表不一定要有实参，带了括号就表示能带参数的表达式，new Foo()和new Foo(10)是一样的表达式，前者的参数为0个而已。
+new (带参数列表) 和成员访问（点运算符）的优先级是一样的（都是19），优先级一样的情况下，表达式从左向右运算，就好像加和减的优先级一样，计算时从左向右算。因此出现new Foo().getName这样的表达式时，从左向右，先计算new Foo(), 再计算 **.getName，相当于(new Foo()).getName。就像3+2-1，就相当于(3+2)-1，我们知道这里的括号可以省略，是因为熟悉这样的运算顺序。
+
+new (带参数列表)	n/a	new … ( … )
+new (无参数列表)	从右到左	new …
+new Foo.getName();   // -> 1
+new Foo().getName(); // -> 2
+new Foo() 的优先级大于 new Foo 
+new (Foo.getName());
+(new Foo()).getName();
+面试题
+function Foo(){
+  var getName = function(){console.log(1);}
+  return this;
+}
+Foo.getName = function(){
+  console.log(2);
+}
+Foo.prototype.getName = function(){console.log(3);}
+var getName =function(){console.log(4)}
+function getName(){console.log(5)}
+Foo.getName();//2
+getName();//4
+// Foo().getName();//undefined
+getName();//4
+new Foo.getName();//2
+new Foo().getName()//3
+new new Foo().getName()//3
