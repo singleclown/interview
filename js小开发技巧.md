@@ -555,6 +555,7 @@ export const group = (array, subGroupLength) => {
 }
 
 ### 限频
+防抖和节流的作用都是防止函数多次调用。区别在于，假设一个用户一直触发这个函数，且每次触发函数的间隔小于wait，防抖的情况下只会调用一次，而节流的 情况会每隔一定时间（参数wait）调用函数。
 function debounce(func, wait, immediate) {
 
     let timeout, result;
@@ -601,3 +602,45 @@ const throttle = (func,delay) => {
         func.call();
     },delay);
 };
+
+
+### 尾调用及优化（尾调用不一定出现在函数尾部，只要是最后一步操作即可。）
+函数体内返回调用另外函数的结果例如（return g(x)）
+函数调用会在内存形成一个“调用记录”，又称“调用帧”,调用帧存在于调用栈内。
+尾调用优化-即只保留内层函数的调用帧，只有在不使用外层函数的内部变量才可以优化
+优化
+将表达式的值放入函数参数中，减少函数嵌套
+2.尾递归优化-应用尾递归函数(柯里化)
+循环可以用递归代替，而一旦使用递归，就最好使用尾递归。
+所有用到的内部变量改写成函数的参数。
+将多参数的函数转换成单参数的形式。这里也可以使用柯里化。
+函数式编程有一个概念，叫做柯里化（currying），意思是将多参数的函数转换成单参数的形式。这里也可以使用柯里化。
+3.thunk函数-其实就是写了个闭包(实现方式)
+将参数放到一个临时函数之中，再将这个临时函数传入函数体
+多参数函数，将其替换成只接受回调函数作为参数的单参数函数。
+fs.readFile(fileName,callback);
+let thunk = function(fileName){
+return function (callback){
+return s.readFile(fileName,callback);
+}
+}
+let readFileThunk = thunk(filename);
+readFileThunk(callback);
+纯函数是函数式编程的概念，必须遵守以下一些约束。
+* 		不得改写参数
+* 		不能调用系统 I/O 的API
+* 		不能调用Date.now()或者Math.random()等不纯的方法，因为每次会得到不一样的结果
+### await语法
+缺点在于滥用 await 可能会导致性能问题，因为 await 会阻塞代码，也许之后的异步代码并不依赖于前者，但仍然需要等待前者完成，导致代码失去了并发性。
+很多人以为await会一直等待之后的表达式执行完之后才会继续执行后面的代码，实际上await是一个让出线程的标志。await后面的函数会先执行一遍，然后就会跳出整个async函数来执行后面js栈（后面会详述）的代码。等本轮事件循环执行完了之后又会跳回到async函数中等待await
+后面表达式的返回值，如果返回值为非promise则继续执行async函数后面的代码，否则将返回的promise放入promise队列（Promise的Job Queue）只执行await语句后就返回
+var a = 1;var n=5;
+var b = async () => {
+  a = n+await ++a+n;
+  console.log('2', a) // -> '2' 10
+  a = (await 10) + a
+  console.log('3', a) // -> '3' 20
+}
+b();n++;
+a++;
+console.log('1', a)

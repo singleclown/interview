@@ -74,3 +74,32 @@ e.nativeEvent instanceof     Event
 if (e.target instanceof HTMLInputElement && !isOnComposition) {
     props.onChange(e)
 }
+
+### dom元素读写分离
+function doubleHeight(element) {
+  var currentHeight = element.clientHeight;
+  window.requestAnimationFrame(function () {
+    element.style.height = (currentHeight * 2) + 'px';
+  });
+}
+elements.forEach(doubleHeight);
+### 滚动的监听
+页面滚动事件（scroll）的监听函数，就很适合用 window.requestAnimationFrame() ，推迟到下一次重新渲染
+$(window).on('scroll', function() {
+   window.requestAnimationFrame(scrollHandler);
+});
+### 时间分片
+var start = null;
+var element = document.getElementById('SomeElementYouWantToAnimate');
+element.style.position = 'absolute';
+
+function step(timestamp) {
+  if (!start) start = timestamp;
+  var progress = timestamp - start;
+  element.style.left = Math.min(progress / 10, 200) + 'px';
+  if (progress < 2000) {
+    window.requestAnimationFrame(step);
+  }
+}
+
+window.requestAnimationFrame(step);
