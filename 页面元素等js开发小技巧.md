@@ -103,3 +103,12 @@ function step(timestamp) {
 }
 
 window.requestAnimationFrame(step);
+### 页面刷新
+* history.go(0)
+* location.reload()
+* location=location
+* location.assign(location)
+* document.execcommand(‘refresh‘)
+* window.navigate(location)
+* location.replace(location)
+* document.url=location.href.
