@@ -716,3 +716,92 @@ obj.b.d = obj.b
        }
        return obj;
    }
+
+### 中文乱码问题
+function isUtf8(s) {
+	var lastnames = new Array("ä", "å", "æ", "ç", "è", "é");
+	var count=0;
+	for (var i = 0; i < lastnames.length; i++) {
+		count+=s.split(lastnames[i]).length;
+	}
+	if(count>s.length/5){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+
+### async/await
+1.const test=async function(){return "我是个promise返回值"}
+test().then((data)=>{console.log(data)})
+一个状态为fulfilled并且已经拿到了返回值为"我是个promise返回值"的promise 
+2.async 函数返回一个 Promise 对象，当函数执行的时候，一旦遇到 await 就会先返回，等到触发的异步操作完成，再接着执行函数体内后面的语句。
+async function test1(params) {await setTimeout(()=>{console.log("开始执行")},1000);console.log("我什么时候执行")
+}
+先执行我什么时候执行，再开始执行
+如果await后面是 promise对象，会将promise异步操作转为同步，等待 promise的resolve/reject 返回结果.,再接着执行函数体内后面的语句！
+
+async function test2(){await new Promise(()=>{setTimeout(()=>{console.log("我是不是第一名")},1000)});console.log("我什么时候开始")}
+原来是如果await的是一个promise对象，那么要等待这个对象解析完成，如果没有resolve或者reject那么后面的内容就不会执行!
+async function test(){await new Promise((resolve)=>{setTimeout(()=>{console.log("我是不是第一名");resolve()},1000);});console.log("我什么时候开始")}
+如果await后面如果不是一个promise对象那么它就按正常的js顺序执行，先执行同步代码，当主线程空闲了，再去执行异步队列的任务！
+3.async 返回的promise对象的then方法的返回值是等所有await任务执行完，retrun的返回值作为其值
+async function test5(){await new Promise((resolve)=>{resolve(5);  setTimeout(()=>{console.log("我是不是第一名"); return 44},1000);return 445});console.log("我什么时候开始");return 55}
+data= 55
+4.await 的返回值就是promise的resolve/reject 返回结果，然后通过执行async函数 retrun出来，相当于 Promise.resolve("返回结果")！,reject后面的代码就不执行了
+async function test() {
+    let result = await new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve('返回的值');
+        }, 1000);
+    });
+   console.log(result) //返回的值
+   // 等价于Promise.resolve(result).then(() => console.log(result));
+   return result;
+};
+test().then((data) =>
+    console.log(data)//返回的值
+)
+当async函数抛出异常时或者await 的返回值reject状态 ，Promise 的 reject 方法也会传递这个异常值!
+async function test() {
+    throw Error("获取错误")
+};
+test().catch((error) =>
+    console.log(error)
+);
+//Error: 获取错误
+
+async function test() {
+    let result = await new Promise((resolve, reject) => {
+        setTimeout(() => {
+            reject("获取返回值失败");
+        }, 1000);
+    });
+    console.log(result) //失败后后面代码不执行了
+    return result;
+};
+test().catch((error) =>
+    console.log(error)//获取返回值失败
+);
+
+面试题
+async function test() {
+    console.log("async1");
+    await new Promise((resolve, reject) => {
+        resolve(1)
+    });
+    console.log('async2');
+};
+setTimeout(function () {
+    console.log("setTimeout");
+}, 0);
+test();
+new Promise(function (resolve) {
+    console.log("promise1");
+    resolve();
+}).then(function () {
+    console.log("promise2");
+});
+console.log('end');
+async1,promise1 ，end,aysn2,promise2,settimeout
